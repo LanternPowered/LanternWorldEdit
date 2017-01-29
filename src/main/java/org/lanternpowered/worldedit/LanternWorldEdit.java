@@ -1,7 +1,7 @@
 /*
  * This file is part of LanternWorldEdit, licensed under the MIT License (MIT).
  *
- * Copyright (c) LanternPowered https://www.lanternpowered.org
+ * Copyright (c) LanternPowered <https://www.lanternpowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
