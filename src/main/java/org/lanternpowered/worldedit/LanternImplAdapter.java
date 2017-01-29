@@ -32,19 +32,33 @@ import com.sk89q.worldedit.sponge.SpongeWorld;
 import com.sk89q.worldedit.sponge.adapter.SpongeImplAdapter;
 import org.lanternpowered.server.data.io.store.ObjectSerializer;
 import org.lanternpowered.server.data.io.store.ObjectSerializerRegistry;
+import org.lanternpowered.server.data.io.store.ObjectStore;
+import org.lanternpowered.server.data.io.store.ObjectStoreRegistry;
 import org.lanternpowered.server.game.registry.type.block.BlockRegistryModule;
+import org.lanternpowered.server.game.registry.type.item.EnchantmentRegistryModule;
 import org.lanternpowered.server.game.registry.type.item.ItemRegistryModule;
 import org.lanternpowered.server.game.registry.type.world.biome.BiomeRegistryModule;
+import org.lanternpowered.server.inventory.LanternItemStack;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 
+import java.util.Map;
+
 public class LanternImplAdapter implements SpongeImplAdapter {
+
+    private static DataQuery DATA_VALUE = DataQuery.of("dataVal007");
 
     @Override
     public int resolve(ItemType itemType) {
@@ -80,14 +94,33 @@ public class LanternImplAdapter implements SpongeImplAdapter {
     @Override
     public BaseEntity createBaseEntity(Entity entity) {
         checkNotNull(entity, "entity");
-        final ObjectSerializer serializer = ObjectSerializerRegistry.get().get(entity.getClass()).get();
+        final ObjectSerializer serializer = ObjectSerializerRegistry.get().get(entity.getClass())
+                .orElseThrow(() -> new IllegalStateException("Missing object serializer for entity " + entity.getType()));
         final DataView dataView = serializer.serialize(entity);
         return new BaseEntity(entity.getType().getId(), DataViewNbt.to(dataView));
     }
 
     @Override
     public ItemStack makeSpongeStack(BaseItemStack baseItemStack) {
-        return null;
+        final ItemType itemType = ItemRegistryModule.get().getTypeByInternalId(baseItemStack.getType())
+                .orElseThrow(() -> new IllegalStateException("Invalid item type: " + baseItemStack.getType()));
+        final LanternItemStack itemStack = new LanternItemStack(itemType, baseItemStack.getAmount());
+        final ObjectStore<LanternItemStack> store = ObjectStoreRegistry.get().get(LanternItemStack.class)
+                .orElseThrow(() -> new IllegalStateException("Unable to access the LanternItemStack store."));
+        final DataView view = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        view.set(DATA_VALUE, baseItemStack.getData());
+        store.deserialize(itemStack, view);
+        final Map<Integer, Integer> enchantments = baseItemStack.getEnchantments();
+        if (!enchantments.isEmpty()) {
+            itemStack.offer(Keys.ITEM_ENCHANTMENTS, enchantments.entrySet().stream()
+                    .map(entry -> {
+                        final Enchantment enchantment = EnchantmentRegistryModule.get().getByInternalId(entry.getKey())
+                                .orElseThrow(() -> new IllegalStateException("Invalid enchantment type: " + entry.getKey()));
+                        return new ItemEnchantment(enchantment, entry.getValue());
+                    })
+                    .collect(GuavaCollectors.toImmutableList()));
+        }
+        return itemStack;
     }
 
     @Override

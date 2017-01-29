@@ -64,7 +64,8 @@ public class LanternWEWorld extends SpongeWorld {
     @SuppressWarnings("unchecked")
     @Override
     protected void applyTileEntityData(TileEntity tileEntity, BaseBlock baseBlock) {
-        final ObjectStore store = ObjectStoreRegistry.get().get(tileEntity.getClass()).get();
+        final ObjectStore store = ObjectStoreRegistry.get().get(tileEntity.getClass())
+                .orElseThrow(() -> new IllegalStateException("Missing object store for tile " + tileEntity.getType()));
         final CompoundTag tag = baseBlock.getNbtData();
         final DataView dataView = tag == null ? new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED) : DataViewNbt.from(tag);
         store.deserialize(tileEntity, dataView);
@@ -73,7 +74,8 @@ public class LanternWEWorld extends SpongeWorld {
     @SuppressWarnings("unchecked")
     @Override
     protected void applyEntityData(Entity entity, BaseEntity baseEntity) {
-        final ObjectStore store = ObjectStoreRegistry.get().get(entity.getClass()).get();
+        final ObjectStore store = ObjectStoreRegistry.get().get(entity.getClass())
+                .orElseThrow(() -> new IllegalStateException("Missing object store for entity " + entity.getType()));
         final CompoundTag tag = baseEntity.getNbtData();
         final DataView dataView = tag == null ? new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED) : DataViewNbt.from(tag);
         for (String field : Constants.NO_COPY_ENTITY_NBT_FIELDS) {
