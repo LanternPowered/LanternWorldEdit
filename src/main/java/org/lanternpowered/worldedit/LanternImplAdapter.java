@@ -41,22 +41,22 @@ import org.lanternpowered.server.game.registry.type.world.biome.BiomeRegistryMod
 import org.lanternpowered.server.inventory.LanternItemStack;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class LanternImplAdapter implements SpongeImplAdapter {
+final class LanternImplAdapter implements SpongeImplAdapter {
 
     private static DataQuery DATA_VALUE = DataQuery.of("dataVal007");
 
@@ -107,7 +107,7 @@ public class LanternImplAdapter implements SpongeImplAdapter {
         final LanternItemStack itemStack = new LanternItemStack(itemType, baseItemStack.getAmount());
         final ObjectStore<LanternItemStack> store = ObjectStoreRegistry.get().get(LanternItemStack.class)
                 .orElseThrow(() -> new IllegalStateException("Unable to access the LanternItemStack store."));
-        final DataView view = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        final DataView view = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         view.set(DATA_VALUE, baseItemStack.getData());
         store.deserialize(itemStack, view);
         final Map<Integer, Integer> enchantments = baseItemStack.getEnchantments();
@@ -118,7 +118,7 @@ public class LanternImplAdapter implements SpongeImplAdapter {
                                 .orElseThrow(() -> new IllegalStateException("Invalid enchantment type: " + entry.getKey()));
                         return new ItemEnchantment(enchantment, entry.getValue());
                     })
-                    .collect(GuavaCollectors.toImmutableList()));
+                    .collect(Collectors.toList()));
         }
         return itemStack;
     }

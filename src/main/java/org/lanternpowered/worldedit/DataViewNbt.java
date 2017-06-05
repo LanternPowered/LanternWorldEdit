@@ -37,10 +37,10 @@ import com.sk89q.jnbt.LongTag;
 import com.sk89q.jnbt.ShortTag;
 import com.sk89q.jnbt.StringTag;
 import com.sk89q.jnbt.Tag;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,9 +50,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public final class DataViewNbt {
+final class DataViewNbt {
 
-    public static CompoundTag to(DataView dataView) {
+    static CompoundTag to(DataView dataView) {
         return (CompoundTag) to0(dataView);
     }
 
@@ -99,7 +99,7 @@ public final class DataViewNbt {
         throw new IllegalArgumentException("Unsupported object type: " + object);
     }
 
-    public static DataView from(CompoundTag tag) {
+    static DataView from(CompoundTag tag) {
         return (DataView) from(tag, null);
     }
 
@@ -107,7 +107,7 @@ public final class DataViewNbt {
         if (tag instanceof CompoundTag) {
             final Map<String, Tag> map = ((CompoundTag) tag).getValue();
             if (view == null) {
-                view = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+                view = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
             }
             for (Map.Entry<String, Tag> entry : map.entrySet()) {
                 if (entry.getValue() instanceof CompoundTag) {

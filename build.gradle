@@ -15,6 +15,7 @@ sponge {
         id = "lantern_worldedit"
         meta {
             name = project.name
+            version = project.version
             description = project.description
             authors = [ "Cybermaxke" ]
         }
@@ -37,7 +38,7 @@ repositories {
 
 // Project dependencies
 dependencies {
-    compile 'org.spongepowered:spongeapi:6.0.0-SNAPSHOT'
+    compile 'org.spongepowered:spongeapi:7.0.0-SNAPSHOT'
     compile 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
     compile 'com.sk89q.worldedit:worldedit-sponge:6.1.7-SNAPSHOT'
     compile 'org.lanternpowered:lanternserver:1.0.0'
@@ -53,7 +54,6 @@ processResources {
 
 task sourceJar(type: Jar) {
     classifier = 'sources'
-    //noinspection GrUnresolvedAccess,GroovyAssignabilityCheck
     from sourceSets.main.allSource
 }
 assemble.dependsOn sourceJar
@@ -79,5 +79,5 @@ license {
 
 // Gradle version used for generating the Gradle wrapper
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
+    gradleVersion = '3.5'
 }

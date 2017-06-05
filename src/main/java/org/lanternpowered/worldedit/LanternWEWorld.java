@@ -41,16 +41,16 @@ import org.lanternpowered.server.data.io.store.ObjectStoreRegistry;
 import org.lanternpowered.server.game.registry.type.block.BlockRegistryModule;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class LanternWEWorld extends SpongeWorld {
+final class LanternWEWorld extends SpongeWorld {
 
     LanternWEWorld(World world) {
         super(world);
@@ -67,7 +67,7 @@ public class LanternWEWorld extends SpongeWorld {
         final ObjectStore store = ObjectStoreRegistry.get().get(tileEntity.getClass())
                 .orElseThrow(() -> new IllegalStateException("Missing object store for tile " + tileEntity.getType()));
         final CompoundTag tag = baseBlock.getNbtData();
-        final DataView dataView = tag == null ? new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED) : DataViewNbt.from(tag);
+        final DataView dataView = tag == null ? DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED) : DataViewNbt.from(tag);
         store.deserialize(tileEntity, dataView);
     }
 
@@ -77,7 +77,7 @@ public class LanternWEWorld extends SpongeWorld {
         final ObjectStore store = ObjectStoreRegistry.get().get(entity.getClass())
                 .orElseThrow(() -> new IllegalStateException("Missing object store for entity " + entity.getType()));
         final CompoundTag tag = baseEntity.getNbtData();
-        final DataView dataView = tag == null ? new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED) : DataViewNbt.from(tag);
+        final DataView dataView = tag == null ? DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED) : DataViewNbt.from(tag);
         for (String field : Constants.NO_COPY_ENTITY_NBT_FIELDS) {
             dataView.remove(DataQuery.of(field));
         }
